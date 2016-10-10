@@ -40,7 +40,7 @@ A common use case may be to customize the pin list:
 
 ~~~ruby
 if tester.svf?
-  # Only include these pin in .svf files
+  # Only include these pins in .svf files
   pin_pattern_order :rstn, :trstn, :done, :fail, only: true
 else
   # Full pin list
