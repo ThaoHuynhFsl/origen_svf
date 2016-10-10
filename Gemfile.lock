@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    origen_svf (0.1.0)
+    origen_svf (0.2.0)
       origen (>= 0.7.36)
       origen_testers
 
