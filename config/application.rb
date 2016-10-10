@@ -11,13 +11,13 @@ class OrigenSVFApplication < Origen::Application
   config.name     = "origen_svf"
   config.initials = "OrigenSVF"
   # Change this to point to the revision control repository for this plugin
-  #config.rc_url   = "ssh://git@github.com:myaccount/origen_svf.git" 
+  config.rc_url   = "ssh://git@github.com:Origen-SDK/origen_svf.git"
   config.release_externally = true
 
   # To enable deployment of your documentation to a web server (via the 'origen web'
   # command) fill in these attributes.
-  #config.web_directory = "git@github.com:Origen-SDK/Origen-SDK.github.io.git/origen_svf"
-  #config.web_domain = "http://origen-sdk.org/origen_svf"
+  config.web_directory = "git@github.com:Origen-SDK/Origen-SDK.github.io.git/svf"
+  config.web_domain = "http://origen-sdk.org/svf"
 
   # When false Origen will be less strict about checking for some common coding errors,
   # it is recommended that you leave this to true for better feedback and easier debug.

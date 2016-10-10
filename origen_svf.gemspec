@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = OrigenSVF::VERSION
   spec.authors       = ["Stephen McGinty"]
   spec.email         = ["stephen.mcginty@nxp.com"]
-  spec.summary       = "Origen plugin to render a JTAG-based pattern in Serial Vector Format (SVF)"
-  #spec.homepage      = "http://origen-sdk.org/origen_svf"
+  spec.summary       = "Origen plugin to render JTAG-based patterns in Serial Vector Format (SVF)"
+  spec.homepage      = "http://origen-sdk.org/svf"
 
   spec.required_ruby_version     = '>= 2'
   spec.required_rubygems_version = '>= 1.8.11'
@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
 
   # Add any gems that your plugin needs to run within a host application
   spec.add_runtime_dependency "origen", ">= 0.7.36"
+  spec.add_runtime_dependency "origen_testers"
 end
