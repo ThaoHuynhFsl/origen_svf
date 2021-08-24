@@ -46,6 +46,9 @@ module OrigenSVF
     end
 
     def write_dr(reg_or_val, options = {})
+      if reg_or_val.has_overlay?
+        cc "Overlay on ATE: #{reg_or_val.overlay_str}"
+      end
       microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val)});"
     end
 
@@ -54,6 +57,9 @@ module OrigenSVF
     end
 
     def read_dr(reg_or_val, options = {})
+      if reg_or_val.has_overlay?
+        cc "Overlay on ATE: #{reg_or_val.overlay_str}"
+      end
       microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val)}) MASK(#{mask(reg_or_val, options)});"
     end
 
@@ -98,10 +104,51 @@ module OrigenSVF
         super
       end
     end
+    def handshake(options = {})
+      ss 'Tester handshake is not support.  Add comment here to highlight'
+    end
+
+    def start_subroutine(name)
+        local_subroutines << name.to_s.chomp unless local_subroutines.include?(name.to_s.chomp) || @inhibit_vectors
+        # name += "_subr" unless name =~ /sub/
+        ::Pattern.open name: name, call_startup_callbacks: false, subroutine: true
+      end
+
+      # Ends the current subroutine that was started with a previous call to start_subroutine
+      def end_subroutine(_cond = false)
+        ::Pattern.close call_shutdown_callbacks: false, subroutine: true
+      end
+# Returns an array of subroutines created by the current pattern
+      def local_subroutines # :nodoc:
+        @local_subroutines ||= []
+      end
+
+      def loop_vectors(name = nil, number_of_loops = 1, _global = false)
+        # The name argument is present to maych J750 API, sort out the
+        unless name.is_a?(String)
+          name, number_of_loops, global = nil, name, number_of_loops
+        end
+        if number_of_loops > 1
+          cc "Looping is not support by SVF.  Add comment here to highligh."
+          cc "LOOPING #{name} #{number_of_loops} times"
+          yield
+          cc "END LOOPING #{name}"
+        else
+          yield
+        end
+      end
+      alias_method :loop_vector, :loop_vectors
+
+
 
     private
 
-    def data(reg_or_val)
+    def data(reg_or_val, options = {})
+      unless reg_or_val.is_a? Numeric
+      if reg_or_val.has_overlay?
+        debugger
+      end
+      end
       d = reg_or_val.respond_to?(:data) ? reg_or_val.data : reg_or_val
       d.to_s(16).upcase
     end
@@ -122,5 +169,6 @@ module OrigenSVF
     def size(reg_or_val, options = {})
       options[:size] || reg_or_val.size
     end
+
   end
 end
