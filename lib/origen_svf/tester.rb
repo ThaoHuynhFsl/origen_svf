@@ -139,7 +139,16 @@ module OrigenSVF
       end
       alias_method :loop_vector, :loop_vectors
 
+      def match_block(timeout_in_cycles, options = {}, &block)
+          cc "Matchloop is not support by SVF.  Add comment here to highligh."
+          cc "Matchloop is waiting for #{timeout_in_cycles} cycles "
+      end
 
+      def match(pin, state, timeout_in_cycles, options = {})
+          cc "Matchloop is not support by SVF.  Add comment here to highligh."
+          cc "Matchloop is waiting on pin #{pin} to go #{state}"
+          cc "Matchloop is waiting for #{timeout_in_cycles} cycles "
+      end
 
     private
 
@@ -169,6 +178,36 @@ module OrigenSVF
     def size(reg_or_val, options = {})
       options[:size] || reg_or_val.size
     end
+
+    def s_to_cycles(time) # :nodoc:
+        ((time.to_f) * 1000 * 1000 * 1000 / current_period_in_ns).to_int
+      end
+
+      def ms_to_cycles(time) # :nodoc:
+        ((time.to_f) * 1000 * 1000 / current_period_in_ns).to_int
+      end
+
+      def us_to_cycles(time) # :nodoc:
+        ((time.to_f * 1000) / current_period_in_ns).to_int
+      end
+
+      def ns_to_cycles(time) # :nodoc:
+        (time.to_f / current_period_in_ns).to_int
+      end
+
+      def cycles_to_us(cycles) # :nodoc:
+        ((cycles.to_f * current_period_in_ns) / (1000)).ceil
+      end
+
+      def cycles_to_ms(cycles) # :nodoc:
+        ((cycles.to_f * current_period_in_ns) / (1000 * 1000)).ceil
+      end
+
+      # Cycles to tenths of a second
+      def cycles_to_ts(cycles) # :nodoc:
+        ((cycles.to_f * current_period_in_ns) / (1000 * 1000 * 100)).ceil
+      end
+
 
   end
 end
