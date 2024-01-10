@@ -61,6 +61,8 @@ module OrigenSVF
         cc "Overlay on ATE: #{reg_or_val.overlay_str}"
       end
       microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val)}) MASK(#{mask(reg_or_val, options)});"
+      # Clear read and similar flags to reflect that the request has just been fulfilled
+      reg_or_val.clear_flags if reg_or_val.respond_to?(:clear_flags)
     end
 
     def pattern_footer(options = {})
