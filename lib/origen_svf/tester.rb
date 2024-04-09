@@ -2,10 +2,14 @@ module OrigenSVF
   class Tester
     include OrigenTesters::VectorBasedTester
 
-    def initialize
+    # pad leading 0 to register data duirng read dr
+    attr_accessor :pad_leading_0s
+
+    def initialize(options = {})
       @pat_extension = 'svf'
       @compress = false
       @comment_char = '//'
+      @pad_leading_0s = options[:pad_leading_0s]
     end
 
     def subdirectory
@@ -42,25 +46,29 @@ module OrigenSVF
     end
 
     def write_ir(reg_or_val, options = {})
-      microcode "SIR #{size(reg_or_val, options)} TDI(#{data(reg_or_val)});"
+      microcode "SIR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
     end
 
     def write_dr(reg_or_val, options = {})
       if reg_or_val.has_overlay?
         cc "Overlay on ATE: #{reg_or_val.overlay_str}"
       end
-      microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val)});"
+      microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
     end
 
     def read_ir(reg_or_val, options = {})
-      microcode "SIR #{size(reg_or_val, options)} TDO(#{data(reg_or_val)}) MASK(#{mask(reg_or_val, options)});"
+      microcode "SIR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options)}) MASK(#{mask(reg_or_val, options)});"
     end
 
     def read_dr(reg_or_val, options = {})
       if reg_or_val.has_overlay?
         cc "Overlay on ATE: #{reg_or_val.overlay_str}"
       end
-      microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val)}) MASK(#{mask(reg_or_val, options)});"
+      if @pad_leading_0s
+        microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options.merge(pad_leading_0s: true))}) MASK(#{mask(reg_or_val, options)});"
+      else
+        microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options)}) MASK(#{mask(reg_or_val, options)});"
+      end
       # Clear read and similar flags to reflect that the request has just been fulfilled
       reg_or_val.clear_flags if reg_or_val.respond_to?(:clear_flags)
     end
@@ -162,7 +170,13 @@ module OrigenSVF
       # end
       # end
       d = reg_or_val.respond_to?(:data) ? reg_or_val.data : reg_or_val
-      d.to_s(16).upcase
+
+      if options[:pad_leading_0s]
+        # HEX is 4 bits so divide to get the padding length
+        d.to_s(16).upcase.rjust(options[:size] / 4, '0')
+      else
+        d.to_s(16).upcase
+      end
     end
 
     def mask(reg_or_val, options = {})
