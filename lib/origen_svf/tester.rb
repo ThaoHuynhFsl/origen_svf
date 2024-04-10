@@ -65,7 +65,7 @@ module OrigenSVF
         cc "Overlay on ATE: #{reg_or_val.overlay_str}"
       end
       if @pad_leading_0s
-        microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options.merge(pad_leading_0s: true))}) MASK(#{mask(reg_or_val, options)});"
+        microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options.merge(pad_leading_0s: true))}) MASK(#{mask(reg_or_val, options.merge(pad_leading_0s: true))});"
       else
         microcode "SDR #{size(reg_or_val, options)} TDO(#{data(reg_or_val, options)}) MASK(#{mask(reg_or_val, options)});"
       end
@@ -186,7 +186,11 @@ module OrigenSVF
           v <<= 1
           v |= 1 if bit.is_to_be_read?
         end
-        v.to_s(16).upcase
+        if options[:pad_leading_0s]
+          v.to_s(16).upcase.rjust(options[:size] / 4, '0')
+        else
+          v.to_s(16).upcase
+        end
       else
         ((1 << size(reg_or_val, options)) - 1).to_s(16).upcase
       end
