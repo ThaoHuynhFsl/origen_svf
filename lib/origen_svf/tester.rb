@@ -47,7 +47,11 @@ module OrigenSVF
     end
 
     def write_ir(reg_or_val, options = {})
-      microcode "SIR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
+      if @pad_leading_0s
+        microcode "SIR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options.merge(pad_leading_0s: true))});"
+      else
+        microcode "SIR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
+      end
     end
 
     def write_dr(reg_or_val, options = {})
