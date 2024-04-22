@@ -10,6 +10,7 @@ module OrigenSVF
       @compress = false
       @comment_char = '//'
       @pad_leading_0s = options[:pad_leading_0s]
+      @fpga_setup = options[:fpga_setup]
     end
 
     def subdirectory
@@ -53,7 +54,11 @@ module OrigenSVF
       if reg_or_val.has_overlay?
         cc "Overlay on ATE: #{reg_or_val.overlay_str}"
       end
-      microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
+      if @pad_leading_0s
+        microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options.merge(pad_leading_0s: true))});"
+      else
+        microcode "SDR #{size(reg_or_val, options)} TDI(#{data(reg_or_val, options)});"
+      end
     end
 
     def read_ir(reg_or_val, options = {})
@@ -101,7 +106,9 @@ module OrigenSVF
           fail "Unknown pin state: #{pin.state}"
         end
       end
-      microcode "PIO (#{v})"
+      unless @fpga_setup
+        microcode "PIO (#{v})"
+      end
       delay(options[:repeat]) if options[:repeat] && options[:repeat] > 1
     end
 
@@ -171,7 +178,7 @@ module OrigenSVF
       # end
       d = reg_or_val.respond_to?(:data) ? reg_or_val.data : reg_or_val
 
-      if options[:pad_leading_0s]
+      if options[:pad_leading_0s] && !options[:size].nil?
         # HEX is 4 bits so divide to get the padding length
         d.to_s(16).upcase.rjust(options[:size] / 4, '0')
       else
