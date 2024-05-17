@@ -11,6 +11,7 @@ module OrigenSVF
       @comment_char = '//'
       @pad_leading_0s = options[:pad_leading_0s]
       @fpga_setup = options[:fpga_setup]
+      @regression = options[:regression]
     end
 
     def subdirectory
@@ -162,8 +163,19 @@ module OrigenSVF
     alias_method :loop_vector, :loop_vectors
 
     def match_block(timeout_in_cycles, options = {}, &block)
+      time_unit = nil
+      wait_time = nil
+      options.each do |key, value|
+        if key =~ /time_in_/ && value != 0
+          time_unit = key.to_s.gsub('time_in_', '')
+          wait_time = value
+        end
+      end
       cc 'Matchloop is not support by SVF.  Add comment here to highligh.'
-      cc "Matchloop is waiting for #{timeout_in_cycles} cycles "
+      cc "Matchloop is waiting for #{wait_time ? wait_time : timeout_in_cycles} #{time_unit ? time_unit : 'cycles'}"
+      if @regression  # when using as regression we want to output more details
+        microcode "MATCH WAIT #{wait_time ? wait_time : timeout_in_cycles} #{time_unit ? time_unit : 'cycles'}"
+      end
     end
 
     def match(pin, state, timeout_in_cycles, options = {})
